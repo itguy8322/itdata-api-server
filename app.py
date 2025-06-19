@@ -1,11 +1,13 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import requests
 
 app = Flask(__name__)
+CORS(app)
 headers = {
     "Authorization": "Token 94af83d1c32ff92892cfa4bfe7f7732f7a4c7925"  # Replace <value> with the actual API key or token.
 }
-@app.route('/purchase-aritime')
+@app.route('/purchase-airtime', methods=["POST"])
 def purchase_airtime():
     
     userId = request.form["userId"]
