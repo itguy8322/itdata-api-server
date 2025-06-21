@@ -1,6 +1,16 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
+import firebase_admin
+from firebase_admin import credentials, auth, firestore
+
+# Load the service account key
+cred = credentials.Certificate("config/config.json")
+firebase_admin.initialize_app(cred)
+
+# Now you can use Firestore, Auth, etc.
+db = firestore.client()
+
 
 app = Flask(__name__)
 CORS(app)
@@ -46,7 +56,8 @@ def purchase_airtime():
                 if "Please check," in error:
                     return jsonify({"status": error, "wallet_bal": f"{total}"})
                 else:
-                    return jsonify({"status":"Sorry for the inconvenient, Please try again later!", "wallet_bal": f"{total}"})
+                    userData = db.collection('users').document(userId).get().to_dict()
+                    return jsonify({"status":"Sorry for the inconvenient, Please try again later!", "wallet_bal": f"{total}", "userData": userData})
             else:
                 return jsonify({"status":"pending", "data": response.json(), "wallet_bal": f"{total}", "transactions":[]})
         except Exception as e:
