@@ -1,23 +1,15 @@
+import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
+import os
+firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS")
+firebase_cred_dict = json.loads(firebase_cred_json)
 
 # Load the service account key
-cred = credentials.Certificate({
-  "type": "service_account",
-  "project_id": "it-project-83335",
-  "private_key_id": "1a969fd9efc534c8713e7c7cc814eec8ab5fddc1",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDA4Nm5BWoBl/b2\nD2sZyZjbr4fptwyviqwKepHzquMk8OieoefHdOYUPCIb+/uBWNFbdRr8dgfKuV3P\neG3TMLI2+S1mfScccymFBAKurFhmDOKo57W8QWpVvMPzkCEz3hETJzt/tGgZ5oX7\nHyKglhBfro3VTt2zJwqK+m8yrBK7lLX7yC+3mUbqyusNwiy0QRCXlKFVKcSdmfY8\n75eUKxeQ4I8NjBwDrSU1mC0wers/rZBuwSVdUutoAq6xUBVaM49zKaKhbwuh7LxX\njkMkWpmkyuxHC+7yfI4dQWWP6kQN7tTykW9x8KtA8XQJXZphC0qKNCB7niZcyROU\nHCS2vfHHAgMBAAECggEAW5xwzUidCRS84DKClEUErZO54nBnPhmHjZKaMDpCmREz\n6+TKyhnkDkhhixksZEtjZSVCJBeLq+ZPgHOa9mxyuVmxDrTzFrg8SEmXXI/PjOkh\n30fvMfOAJij6iX0zyAb55TcFM6rkpyivCo/HSq78J/Yot+A1vRoWD9zTZCYG38D3\nduDhtggrHgau/8ikI9V6wCHOPS4sC8zPamZ3EDq8U2q2fqxJnVNEGEvdQoRrA/Jg\nzCBQ12bDygNZTwR++cYPpHOnFZ/tjJd1hvJVW4Vy2pjDmkatRANlivWR2xm1h33p\nLrZ1hf39V0gaCakjDofbfs4brIQlGARPHd9UnlQWwQKBgQDgAhENt3Xr7W9eBduV\n3Ag3YKlbsxljzolqYL/MYq0OQE0F4K8G+nPTN4tCLxdWnjVGtM+8Tz/XJGl4XfiF\nWu+BUw1Uk5A2DdCGxoiWURtWUKmz7qdcpNhWdHDeElP8eHpcFzSf/cFrXWwJ2bwI\n8m35OstvZt7TW9B5RgE0IcpKqwKBgQDcbKcTExIsjgVz2EUJFwp55nuRsqxc6S1n\nJ3idR9jb3fkaspj79KgJuPfiZl3SLD+Z8KxrKaUc8TugoJnVGAdAPSn18nFlCR1P\nb6qVF3OEEYSELfAOXdIxnrkAaY6CyZm0jwu3/rcmcwlRkKZEMaqXUyVdgKYtmWbQ\nGxAQP1l1VQKBgA1vskwrU/Rp0oNGQKyVfRytPJtWe9BjxBRQZ1DAHnc7XiNbHcSC\nY04pB75ZisHUTYfHMqqt6jtiYL0qjcyZ7sHIFIWdMEo9u+NJp0m05bngrr0vNHS3\nIo7U/ywi10zOgTBi5/Isy1xAR0mz+LZkrDoFz8wH1JfC6xdLHqlc2YBvAoGATpaW\nguB7zFLecs0a4ADNBWU9jVbMyVuBipOyFzF0if98Px6KGNrDxqOiDaA9tx97laEP\neC2i5szDW6Om9SjZ/PdRrJTCBSnYv2eqw/lWgDHWs2HFgvnEZViX0SPRYaQLHysZ\nHIK+PgEpw2D1Rr8GeWl1mv6xQPS+iVf8xC4x8PkCgYBYmJY5qNvvwO140thH4AYT\nRws3hCvnJRYupRZ3Ec3j93/v3cvDR4gGx+1m64PrTQI+WqJgQK2SRLZQTvFfOTN6\nv+R+cca4+WmcwjWvC2e81XhloC+hGmGEYoSsNFoXCBfwXO7LGQ1kFxzWRUVngnPB\nVzeJC3iOr9Gc08ZYxYaC6g==\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-fbsvc@it-project-83335.iam.gserviceaccount.com",
-  "client_id": "108831822163714957496",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40it-project-83335.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-})
+cred = credentials.Certificate(firebase_cred_dict)
 firebase_admin.initialize_app(cred)
 
 # Now you can use Firestore, Auth, etc.
