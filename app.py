@@ -5,11 +5,10 @@ import requests
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
 import os
-firebase_cred_json = os.getenv("FIREBASE_SECRET")
-firebase_cred_dict = json.loads(firebase_cred_json)
+
 
 # Load the service account key
-cred = credentials.Certificate(firebase_cred_dict)
+cred = credentials.Certificate("/etc/secrets/config.json")
 firebase_admin.initialize_app(cred)
 
 # Now you can use Firestore, Auth, etc.
