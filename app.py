@@ -5,7 +5,7 @@ import requests
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
 import os
-firebase_cred_json = os.getenv("FIREBASE_CREDENTIALS")
+firebase_cred_json = os.getenv("FIREBASE_SECRET")
 firebase_cred_dict = json.loads(firebase_cred_json)
 
 # Load the service account key
