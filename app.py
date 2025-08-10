@@ -58,11 +58,14 @@ def purchase_airtime():
         w_bal = float(user_data['wallet_bal'])
         trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
         print("pass2")
+        providers = db.collection('users').document("providers").get().to_dict()
+        providers = {providers[provider]:provider for provider in providers} # type: ignore
+        user_data = userRef
         transaction_data = {
             'user_id': userId,
             "type": "airtime",
             'amount': amount,
-            'network': network,
+            'network': providers[network],
             'number': number,
             'status': 'pending',
             'trnxId': trnx_id,
@@ -601,5 +604,40 @@ def webhook():
         return jsonify({"status": "success", "message_id": response,"token":fcm_token})
     except Exception as e:
         return jsonify({"status": "fail", "error": str(e),"token":fcm_token}) # type: ignore
+
+
+@app.route('/send-notification', methods=["POST"])
+def send_notification():
+    data = request.get_json()
+    users = data["users"]
+    message = data["message"]
+    title = data["title"]
+    successful = []
+    failed = []
+    for user in users:
+        notification = {
+            "id": users["id"],
+            "title": title,
+            "content": message,
+            'timestamp': firestore.firestore.SERVER_TIMESTAMP
+        }
+        db.collection('notifications').document().set(notification)
+        try:
+            message = messaging.Message(
+                notification=messaging.Notification(
+                    title=title,
+                    body=message
+                ),
+                data={
+                    "userId": users["id"]
+                },
+                token=users["token"]
+            )
+            response = messaging.send(message)
+            successful.append(user)
+        except:
+            failed.append(user)
+    return jsonify({"status": "success", "successful": successful, "failed": failed})
+
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0', port=80)
