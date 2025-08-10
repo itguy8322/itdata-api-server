@@ -616,7 +616,7 @@ def send_notification():
     failed = []
     for user in users:
         notification = {
-            "id": users["id"],
+            "id": user["id"],
             "title": title,
             "content": message,
             'timestamp': firestore.firestore.SERVER_TIMESTAMP
@@ -629,9 +629,9 @@ def send_notification():
                     body=message
                 ),
                 data={
-                    "userId": users["id"]
+                    "userId": user["id"]
                 },
-                token=users["token"]
+                token=user["token"]
             )
             response = messaging.send(message)
             successful.append(user)
