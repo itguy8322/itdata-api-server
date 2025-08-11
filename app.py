@@ -520,12 +520,12 @@ def create_virtual_account():
             print("bvn provided")
             payload["is_permanent"] = True
             payload["bvn"] = bvn
-            payload["narration"]=account_name
+            payload["narration"]=userId
         else:
             print("bvn not provided")
             dynamic_vaccount_ref[tx_ref] = userId
             payload["amount"] = amount
-            payload["narration"]=account_name
+            payload["narration"]=userId
             print(dynamic_vaccount_ref)
 
         url = "https://api.flutterwave.com/v3/virtual-account-numbers"
