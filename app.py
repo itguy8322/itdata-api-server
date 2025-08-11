@@ -84,7 +84,7 @@ def purchase_airtime():
             print("pass4",status_code)
             if status_code in [200, 201]:
                 
-                userRef.update({'wallet_bal': float(w_bal - amount)})
+                userRef.update({'wallet_bal': str(float(w_bal - amount))})
                 print("pass5")
                 total = float(w_bal - amount)
                 transaction_data["balance"] = total
@@ -162,7 +162,7 @@ def purchase_data():
             resp_json = response.json()
 
             if status_code in [200, 201]:
-                userRef.update({'wallet_bal': float(w_bal - amount)})
+                userRef.update({'wallet_bal': str(float(w_bal - amount))})
                 total = float(w_bal - amount)
                 transaction_data["balance"] = total
                 transaction_data["status"] = resp_json["status"]
@@ -238,7 +238,7 @@ def purchase_cable():
             resp_json = response.json()
 
             if status_code in [200, 201]:
-                userRef.update({'wallet_bal': float(w_bal - amount)})
+                userRef.update({'wallet_bal': str(float(w_bal - amount))})
                 total = float(w_bal - amount)
                 transaction_data["balance"] = total
                 transaction_data["status"] = resp_json["status"]
@@ -318,7 +318,7 @@ def purchase_electricity():
             resp_json = response.json()
 
             if status_code in [200, 201]:
-                userRef.update({'wallet_bal': float(w_bal - amount)})
+                userRef.update({'wallet_bal': str(float(w_bal - amount))})
                 total = float(w_bal - amount)
                 transaction_data["balance"] = total
                 transaction_data["status"] = resp_json["status"]
@@ -400,7 +400,7 @@ def purchase_edupin():
             resp_json = response.json()
 
             if status_code in [200, 201]:
-                userRef.update({'wallet_bal': float(w_bal - amount)})
+                userRef.update({'wallet_bal': str(float(w_bal - amount))})
                 total = float(w_bal - amount)
                 transaction_data["balance"] = total
                 transaction_data["status"] = resp_json["status"]
@@ -515,16 +515,17 @@ def create_virtual_account():
             "lastname":user_data['name'].split(" ")[1], # type: ignore
             
         }
+        account_name = f"{userId} FLW"
         if bvn != "":
             print("bvn provided")
             payload["is_permanent"] = True
             payload["bvn"] = bvn
-            payload["narration"]="Static virtual Account"
+            payload["narration"]=account_name
         else:
             print("bvn not provided")
             dynamic_vaccount_ref[tx_ref] = userId
             payload["amount"] = amount
-            payload["narration"]="Dynamic virtual Account"
+            payload["narration"]=account_name
             print(dynamic_vaccount_ref)
 
         url = "https://api.flutterwave.com/v3/virtual-account-numbers"
@@ -535,6 +536,7 @@ def create_virtual_account():
         if status_code in [200, 201]:
             if resp_json["status"] == "success":
                 virtual_account = resp_json["data"]
+                virtual_account["account_name"] = account_name
                 if bvn != "":
                     db.collection("virtualAccounts").document(tx_ref).set({"userId":userId, "virtualAccount":virtual_account})
                 return jsonify({"status": "success", "message": virtual_account})
@@ -577,7 +579,7 @@ def webhook():
         if status == "successful":
             total = float(userData['wallet_bal']) + (amount - float(charges["amount"])) # type: ignore
             print(amount,total)
-            db.collection('users').document(userId).update({"wallet_bal":total})
+            db.collection('users').document(userId).update({"wallet_bal":str(total)})
             body = f"Your wallet has been successfully credited with the sum of ₦{amount}. Please note that a ₦{charges["amount"]} service fee was deducted as part of the transaction." # type: ignore
         else:
             body = f"The transfer of ₦{amount} was not successful, please try again later to avoid double transaction"
