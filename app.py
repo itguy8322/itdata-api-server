@@ -35,13 +35,13 @@ def purchase_airtime():
     data = request.get_json()
     try:
         userId = data["userId"]
-        network = int(data["network"])
+        provider = data["provider"]
         number = data["number"]
         amount = float(data["amount"])
         airtime_type = data["airtime_type"]
 
         payload = {
-            "network": network,
+            "network": provider["network_id"],
             "phone": number,
             "plan_type": airtime_type,
             "amount": amount,
@@ -58,14 +58,12 @@ def purchase_airtime():
         w_bal = float(user_data['wallet_bal'])
         trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
         print("pass2")
-        providers = db.collection('users').document("providers").get().to_dict()
-        providers = {providers[provider]:provider for provider in providers} # type: ignore
-        user_data = userRef
+        
         transaction_data = {
             'user_id': userId,
             "type": "airtime",
             'amount': amount,
-            'network': providers[network],
+            'network': provider["network"],
             'number': number,
             'status': 'pending',
             'trnxId': trnx_id,
