@@ -39,7 +39,7 @@ def purchase_airtime():
         number = data["number"]
         amount = float(data["amount"])
         airtime_type = data["airtime_type"]
-
+        print(provider, number, amount, airtime_type)
         payload = {
             "network": provider["network_id"],
             "phone": number,
