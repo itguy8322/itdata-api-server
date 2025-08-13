@@ -89,13 +89,13 @@ def purchase_airtime():
                 transaction_data["status"] = resp_json["status"]
                 
                 db.collection('transactions').document(trnx_id).set(transaction_data)
+                title="Airtime Purchase",
+                body=f"You have successfully purchase N{amount} airtime to {number}"
                 message = messaging.Message(
-                    notification=messaging.Notification(
-                        title="Airtime Purchase",
-                        body=f"You have successfully purchase N{amount} airtime to {number}"
-                    ),
                     data={
-                        "userId": userId
+                        "userId": userId,
+                        "title": title,
+                        "content": body
                     },
                     token=fcm_token
                 )
@@ -165,13 +165,13 @@ def purchase_data():
                 transaction_data["balance"] = total
                 transaction_data["status"] = resp_json["status"]
                 db.collection('transactions').document(trnx_id).set(transaction_data)
+                title="Data Purchase",
+                body=f"The purchase of {plan['validate']} - N{amount} data to {number} was successful"
                 message = messaging.Message(
-                    notification=messaging.Notification(
-                        title="Data Purchase",
-                        body=f"The purchase of {plan['validate']} - N{amount} data to {number} was successful"
-                    ),
                     data={
-                        "userId": userId
+                        "userId": userId,
+                        "title": title,
+                        "content": body
                     },
                     token=fcm_token
                 )
@@ -242,13 +242,14 @@ def purchase_cable():
                 transaction_data["status"] = resp_json["status"]
                 db.collection('transactions').document(trnx_id).set(transaction_data)
                 fcm_token = user_data["fcm_token"]
+
+                title="Cable Subscription Purchase",
+                body=f"The purchase of {plan['plan_name']} - N{amount} was successful"
                 message = messaging.Message(
-                    notification=messaging.Notification(
-                        title="Cable Subscription Purchase",
-                        body=f"The purchase of {plan['plan_name']} - N{amount} was successful"
-                    ),
                     data={
-                        "userId": userId
+                        "userId": userId,
+                        "title": title,
+                        "content": body
                     },
                     token=fcm_token
                 )
@@ -325,13 +326,14 @@ def purchase_electricity():
                 transaction_data["network"] = disco_name
                 db.collection('transactions').document(trnx_id).set(transaction_data)
                 fcm_token = user_data["fcm_token"]
+
+                title="Electric Bill Purchase",
+                body=f"The purchase of N{amount} {disco_name} Electric bill was successful."
                 message = messaging.Message(
-                    notification=messaging.Notification(
-                        title="Electric Bill Purchase",
-                        body=f"The purchase of N{amount} {disco_name} Electric bill was successful."
-                    ),
                     data={
-                        "userId": userId
+                        "userId": userId,
+                        "title": title,
+                        "content": body
                     },
                     token=fcm_token
                 )
@@ -591,12 +593,10 @@ def webhook():
         }
         db.collection('notifications').document().set(notification)
         message = messaging.Message(
-            notification=messaging.Notification(
-                title=title,
-                body=body
-            ),
             data={
-                "userId": userId
+                "userId": userId,
+                "title": title,
+                "content": body
             },
             token=fcm_token
         )
@@ -624,12 +624,10 @@ def send_notification():
         db.collection('notifications').document().set(notification)
         try:
             message = messaging.Message(
-                notification=messaging.Notification(
-                    title=title,
-                    body=message
-                ),
                 data={
-                    "userId": user["id"]
+                    "userId": user["id"],
+                    "title": title,
+                    "content": message
                 },
                 token=user["token"]
             )
