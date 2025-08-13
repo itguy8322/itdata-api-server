@@ -635,8 +635,8 @@ def send_notification():
             )
             response = messaging.send(message)
             successful.append(user)
-        except:
-            failed.append(user)
+        except Exception as e:
+            failed.append({"data": user, "error": str(e)})
     return jsonify({"status": "success", "successful": successful, "failed": failed})
 
 if __name__ == "__main__":
