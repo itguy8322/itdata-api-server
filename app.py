@@ -610,15 +610,16 @@ def webhook():
 def send_notification():
     data = request.get_json()
     users = data["users"]
-    message = data["message"]
+    msg = data["message"]
     title = data["title"]
     successful = []
     failed = []
     for user in users:
+        print(user)
         notification = {
             "id": user["id"],
             "title": title,
-            "content": message,
+            "content": msg,
             'timestamp': firestore.firestore.SERVER_TIMESTAMP
         }
         db.collection('notifications').document().set(notification)
@@ -627,7 +628,7 @@ def send_notification():
                 data={
                     "userId": user["id"],
                     "title": title,
-                    "content": message
+                    "content": msg
                 },
                 token=user["token"]
             )
