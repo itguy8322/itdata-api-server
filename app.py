@@ -638,5 +638,33 @@ def send_notification():
             failed.append({"data": user, "error": str(e)})
     return jsonify({"status": "success", "successful": successful, "failed": failed})
 
+
+@app.route('/delete-users', methods=["POST"])
+def delete_users():
+    data = request.get_json()
+    users = data["users"]
+    uids = []
+    page = auth.list_users()
+    successful = []
+    failed = []
+    while page:
+        for user in page.users:
+            print(f"UID: {user.uid}, Email: {user.email}")
+            id = user.email.split("@")[0]
+            for user_data in users:
+                if user_data["id"] == id:
+                    print(f"Deleting user: {user.uid}")
+                    try:
+                        auth.delete_user(user.uid)
+                        successful.append(id)
+                    except Exception as e:
+                        print(f"Error deleting user {user.uid}: {str(e)}")
+                        failed.append({"uid": id, "error": str(e)})
+                    break
+            uids.append(user.uid)
+
+        # Go to next page if available
+        page = page.get_next_page()
+    return jsonify({"status": "success", "deleted_users": uids})
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0', port=80)
