@@ -666,5 +666,11 @@ def delete_users():
         # Go to next page if available
         page = page.get_next_page()
     return jsonify({"status": "success", "deleted_users": uids})
+
+@app.route('/keep-quiktopp-server-alive', methods=["POST", "GET"])
+def keep_quiktopp_server_alive():
+    # This endpoint is used to keep the server alive
+    return jsonify({"status": "success", "message": "Server is alive!"})
+
 if __name__ == "__main__":
     app.run(debug=True,host='0.0.0.0', port=80)
