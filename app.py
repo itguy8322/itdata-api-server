@@ -557,6 +557,7 @@ def webhook():
         flw_ref = data["data"]["flw_ref"]
         tx_ref = data["data"]["tx_ref"]
         email = data["data"]["customer"]["email"]
+        date_created = data["data"]["created_datetime"]
         userId = None
         if tx_ref in dynamic_vaccount_ref:
             userId = dynamic_vaccount_ref[tx_ref]
@@ -580,6 +581,17 @@ def webhook():
             total = float(userData['wallet_bal']) + (amount - float(charges["amount"])) # type: ignore
             print(amount,total)
             db.collection('users').document(userId).update({"wallet_bal":str(total)})
+            wallet_fundings = {
+                "userId": userId,
+                "balance_before": str(float(userData['wallet_bal'])), # type: ignore
+                "amount_credited": str(amount),
+                "charges": str(float(charges["amount"])), # type: ignore
+                "balance_after": str(total),
+                "created_at": date_created,
+                "tx_ref": tx_ref,
+                "timestamp": firestore.firestore.SERVER_TIMESTAMP
+            }
+            db.collection('walletFundings').document(tx_ref).set(wallet_fundings)
             body = f"Your wallet has been successfully credited with the sum of ₦{amount}. Please note that a ₦{charges["amount"]} service fee was deducted as part of the transaction." # type: ignore
         else:
             body = f"The transfer of ₦{amount} was not successful, please try again later to avoid double transaction"
