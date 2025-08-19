@@ -177,9 +177,9 @@ def purchase_data():
                     body=f"The purchase of {plan['validate']} - N{amount} data to {number} was successful"
                     message = messaging.Message(
                         data={
-                            "userId": userId,
-                            "title": title,
-                            "content": body
+                            "userId": str(userId),
+                            "title": str(title),
+                            "content": str(body)
                         },
                         token=fcm_token
                     )
@@ -259,9 +259,9 @@ def purchase_cable():
                     body=f"The purchase of {plan['plan_name']} - N{amount} was successful"
                     message = messaging.Message(
                         data={
-                            "userId": userId,
-                            "title": title,
-                            "content": body
+                            "userId": str(userId),
+                            "title": str(title),
+                            "content": str(body)
                         },
                         token=fcm_token
                     )
@@ -348,9 +348,9 @@ def purchase_electricity():
                     body=f"The purchase of N{amount} {disco_name} Electric bill was successful."
                     message = messaging.Message(
                         data={
-                            "userId": userId,
-                            "title": title,
-                            "content": body
+                            "userId": str(userId),
+                            "title": str(title),
+                            "content": str(body)
                         },
                         token=fcm_token
                     )
