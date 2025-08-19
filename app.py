@@ -119,6 +119,7 @@ def purchase_airtime():
         else:
             return jsonify({"status": "Insufficient balance", "message": "Insufficient balance"})
     except Exception as e:
+        print(f"Error: {str(e)}")
         return jsonify({"status": "fail", "message": str(e)})
 
 @app.route('/purchase-data', methods=["POST"])
