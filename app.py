@@ -636,6 +636,7 @@ def send_notification():
             'timestamp': firestore.firestore.SERVER_TIMESTAMP
         }
         db.collection('notifications').document().set(notification)
+        userData = db.collection('users').document(user["id"]).get().to_dict()
         try:
             message = messaging.Message(
                 data={
@@ -643,7 +644,7 @@ def send_notification():
                     "title": title,
                     "content": msg
                 },
-                token=user["token"]
+                token=userData["fcm_token"] # type: ignore
             )
             response = messaging.send(message)
             successful.append(user)
