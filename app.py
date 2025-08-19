@@ -164,7 +164,7 @@ def purchase_data():
             response = requests.post(url, headers=headers, json=payload)
             status_code = response.status_code
             resp_json = response.json()
-
+            print(response.json())
             if status_code in [200, 201]:
                 if resp_json["status"] == "success":
                     userRef.update({'wallet_bal': str(float(w_bal - amount))})
