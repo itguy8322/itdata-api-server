@@ -81,28 +81,32 @@ def purchase_airtime():
             print(response.json())
             print("pass4",status_code)
             if status_code in [200, 201]:
-                discount = db.collection('airtime_discount').document("discount").get().to_dict()
-                discount_amount = float(discount["percentage"]) # type: ignore
-                amount = amount - (amount * (discount_amount / 100))
-                userRef.update({'wallet_bal': str(float(w_bal - amount))})
-                print("pass5")
-                total = float(w_bal - amount)
-                transaction_data["balance"] = total
-                transaction_data["status"] = resp_json["status"]
-                
+                if resp_json["status"] == "success":
+                    discount = db.collection('airtime_discount').document("discount").get().to_dict()
+                    discount_amount = float(discount["percentage"]) # type: ignore
+                    amount = amount - (amount * (discount_amount / 100))
+                    userRef.update({'wallet_bal': str(float(w_bal - amount))})
+                    print("pass5")
+                    total = float(w_bal - amount)
+                    transaction_data["balance"] = total
+                    transaction_data["status"] = resp_json["status"]
+                    
+                    db.collection('transactions').document(trnx_id).set(transaction_data)
+                    title="Airtime Purchase",
+                    body=f"You have successfully purchase N{amount} airtime to {number}"
+                    message = messaging.Message(
+                        data={
+                            "userId": userId,
+                            "title": title,
+                            "content": body
+                        },
+                        token=fcm_token
+                    )
+                    response = messaging.send(message)
+                    print("pass6")
+                    return jsonify(resp_json)
+                transaction_data["status"] = "fail"
                 db.collection('transactions').document(trnx_id).set(transaction_data)
-                title="Airtime Purchase",
-                body=f"You have successfully purchase N{amount} airtime to {number}"
-                message = messaging.Message(
-                    data={
-                        "userId": userId,
-                        "title": title,
-                        "content": body
-                    },
-                    token=fcm_token
-                )
-                response = messaging.send(message)
-                print("pass6")
                 return jsonify(resp_json)
             elif status_code == 400:
                 transaction_data["status"] = "fail"
@@ -162,22 +166,26 @@ def purchase_data():
             resp_json = response.json()
 
             if status_code in [200, 201]:
-                userRef.update({'wallet_bal': str(float(w_bal - amount))})
-                total = float(w_bal - amount)
-                transaction_data["balance"] = total
+                if resp_json["status"] == "success":
+                    userRef.update({'wallet_bal': str(float(w_bal - amount))})
+                    total = float(w_bal - amount)
+                    transaction_data["balance"] = total
+                    transaction_data["status"] = resp_json["status"]
+                    db.collection('transactions').document(trnx_id).set(transaction_data)
+                    title="Data Purchase",
+                    body=f"The purchase of {plan['validate']} - N{amount} data to {number} was successful"
+                    message = messaging.Message(
+                        data={
+                            "userId": userId,
+                            "title": title,
+                            "content": body
+                        },
+                        token=fcm_token
+                    )
+                    response = messaging.send(message)
+                    return jsonify(resp_json)
                 transaction_data["status"] = resp_json["status"]
                 db.collection('transactions').document(trnx_id).set(transaction_data)
-                title="Data Purchase",
-                body=f"The purchase of {plan['validate']} - N{amount} data to {number} was successful"
-                message = messaging.Message(
-                    data={
-                        "userId": userId,
-                        "title": title,
-                        "content": body
-                    },
-                    token=fcm_token
-                )
-                response = messaging.send(message)
                 return jsonify(resp_json)
             elif status_code == 400:
                 transaction_data["status"] = resp_json["status"]
@@ -238,25 +246,30 @@ def purchase_cable():
             resp_json = response.json()
 
             if status_code in [200, 201]:
-                userRef.update({'wallet_bal': str(float(w_bal - amount))})
-                total = float(w_bal - amount)
-                transaction_data["balance"] = total
-                transaction_data["status"] = resp_json["status"]
-                db.collection('transactions').document(trnx_id).set(transaction_data)
-                fcm_token = user_data["fcm_token"]
+                if resp_json["status"] == "success":
+                    userRef.update({'wallet_bal': str(float(w_bal - amount))})
+                    total = float(w_bal - amount)
+                    transaction_data["balance"] = total
+                    transaction_data["status"] = resp_json["status"]
+                    db.collection('transactions').document(trnx_id).set(transaction_data)
+                    fcm_token = user_data["fcm_token"]
 
-                title="Cable Subscription Purchase",
-                body=f"The purchase of {plan['plan_name']} - N{amount} was successful"
-                message = messaging.Message(
-                    data={
-                        "userId": userId,
-                        "title": title,
-                        "content": body
-                    },
-                    token=fcm_token
-                )
-                response = messaging.send(message)
-                return jsonify(resp_json)
+                    title="Cable Subscription Purchase",
+                    body=f"The purchase of {plan['plan_name']} - N{amount} was successful"
+                    message = messaging.Message(
+                        data={
+                            "userId": userId,
+                            "title": title,
+                            "content": body
+                        },
+                        token=fcm_token
+                    )
+                    response = messaging.send(message)
+                    return jsonify(resp_json)
+                transaction_data["status"] = "fail"
+                db.collection('transactions').document(trnx_id).set(transaction_data)
+                #error = resp_json.get("error", ["Unknown error"])[0]
+                return jsonify({"status": "fail", "message": resp_json["message"]})
             elif status_code == 400:
                 transaction_data["status"] = "fail"
                 db.collection('transactions').document(trnx_id).set(transaction_data)
@@ -319,27 +332,32 @@ def purchase_electricity():
             resp_json = response.json()
 
             if status_code in [200, 201]:
-                userRef.update({'wallet_bal': str(float(w_bal - amount))})
-                total = float(w_bal - amount)
-                transaction_data["balance"] = total
-                transaction_data["status"] = resp_json["status"]
-                transaction_data["units"] = resp_json["token"]
-                disco_name = resp_json["disco_name"]
-                transaction_data["network"] = disco_name
-                db.collection('transactions').document(trnx_id).set(transaction_data)
-                fcm_token = user_data["fcm_token"]
+                if resp_json["status"] == "success":
+                    userRef.update({'wallet_bal': str(float(w_bal - amount))})
+                    total = float(w_bal - amount)
+                    transaction_data["balance"] = total
+                    transaction_data["status"] = resp_json["status"]
+                    transaction_data["units"] = resp_json["token"]
+                    disco_name = resp_json["disco_name"]
+                    transaction_data["network"] = disco_name
+                    db.collection('transactions').document(trnx_id).set(transaction_data)
+                    fcm_token = user_data["fcm_token"]
 
-                title="Electric Bill Purchase",
-                body=f"The purchase of N{amount} {disco_name} Electric bill was successful."
-                message = messaging.Message(
-                    data={
-                        "userId": userId,
-                        "title": title,
-                        "content": body
-                    },
-                    token=fcm_token
-                )
-                response = messaging.send(message)
+                    title="Electric Bill Purchase",
+                    body=f"The purchase of N{amount} {disco_name} Electric bill was successful."
+                    message = messaging.Message(
+                        data={
+                            "userId": userId,
+                            "title": title,
+                            "content": body
+                        },
+                        token=fcm_token
+                    )
+                    response = messaging.send(message)
+                    return jsonify(resp_json)
+                print(resp_json)
+                transaction_data["status"] = "fail"
+                db.collection('transactions').document(trnx_id).set(transaction_data)
                 return jsonify(resp_json)
             elif status_code == 400:
                 print(resp_json)
@@ -402,24 +420,29 @@ def purchase_edupin():
             resp_json = response.json()
 
             if status_code in [200, 201]:
-                userRef.update({'wallet_bal': str(float(w_bal - amount))})
-                total = float(w_bal - amount)
-                transaction_data["balance"] = total
+                if resp_json["status"] == "success":
+                    userRef.update({'wallet_bal': str(float(w_bal - amount))})
+                    total = float(w_bal - amount)
+                    transaction_data["balance"] = total
+                    transaction_data["status"] = resp_json["status"]
+                    transaction_data["pins"] = resp_json["pin"]
+                    db.collection('transactions').document(trnx_id).set(transaction_data)
+                    fcm_token = user_data["fcm_token"]
+                    message = messaging.Message(
+                        notification=messaging.Notification(
+                            title="Electric Bill Purchase",
+                            body=f"The purchase of {exam} was successful."
+                        ),
+                        data={
+                            "userId": userId
+                        },
+                        token=fcm_token
+                    )
+                    response = messaging.send(message)
+                    return jsonify(resp_json)
+                print(resp_json)
                 transaction_data["status"] = resp_json["status"]
-                transaction_data["pins"] = resp_json["pin"]
                 db.collection('transactions').document(trnx_id).set(transaction_data)
-                fcm_token = user_data["fcm_token"]
-                message = messaging.Message(
-                    notification=messaging.Notification(
-                        title="Electric Bill Purchase",
-                        body=f"The purchase of {exam} was successful."
-                    ),
-                    data={
-                        "userId": userId
-                    },
-                    token=fcm_token
-                )
-                response = messaging.send(message)
                 return jsonify(resp_json)
             elif status_code == 400:
                 print(resp_json)
