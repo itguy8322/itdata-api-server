@@ -81,7 +81,9 @@ def purchase_airtime():
             print(response.json())
             print("pass4",status_code)
             if status_code in [200, 201]:
-                
+                discount = db.collection('airtime_discount').document("discount").get().to_dict()
+                discount_amount = float(discount["percentage"]) # type: ignore
+                amount = amount - (amount * (discount_amount / 100))
                 userRef.update({'wallet_bal': str(float(w_bal - amount))})
                 print("pass5")
                 total = float(w_bal - amount)
@@ -111,7 +113,7 @@ def purchase_airtime():
                 db.collection('transactions').document(trnx_id).set(transaction_data)
                 return jsonify({"status": "fail", "message": "Sorry for the inconvenient, try again later!"})
         else:
-            return jsonify({"status": "fail", "message": "Insufficient balance"})
+            return jsonify({"status": "Insufficient balance", "message": "Insufficient balance"})
     except Exception as e:
         return jsonify({"status": "fail", "message": str(e)})
 
@@ -186,7 +188,7 @@ def purchase_data():
                 db.collection('transactions').document(trnx_id).set(transaction_data)
                 return jsonify({"status": "fail", "message": "Sorry for the inconvenient, try again later"})
         else:
-            return jsonify({"status": "fail", "message": "Insufficient balance"})
+            return jsonify({"status": "Insufficient balance", "message": "Insufficient balance"})
     except Exception as e:
         return jsonify({"status": "fail", "message": str(e)})
 
@@ -265,7 +267,7 @@ def purchase_cable():
                 db.collection('transactions').document(trnx_id).set(transaction_data)
                 return jsonify({"status": "fail", "message": "Sorry for the inconvenient, try again later"})
         else:
-            return jsonify({"status": "fail", "message": "Insufficient balance"})
+            return jsonify({"status": "Insufficient balance", "message": "Insufficient balance"})
     except Exception as e:
         return jsonify({"status": "fail", "message": str(e)})
 
@@ -349,7 +351,7 @@ def purchase_electricity():
                 db.collection('transactions').document(trnx_id).set(transaction_data)
                 return jsonify({"status": "pending", "message": "Sorry for the inconvenient, try again later."})
         else:
-            return jsonify({"status": "fail", "message": "Insufficient balance"})
+            return jsonify({"status": "Insufficient balance", "message": "Insufficient balance"})
     except Exception as e:
         return jsonify({"status": "fail", "message": str(e)})
 
@@ -429,7 +431,7 @@ def purchase_edupin():
                 db.collection('transactions').document(trnx_id).set(transaction_data)
                 return jsonify({"status": "pending", "message": "Sorry for the inconvenient, try again later."})
         else:
-            return jsonify({"status": "fail", "message": "Insufficient balance"})
+            return jsonify({"status": "Insufficient balance", "message": "Insufficient balance"})
     except Exception as e:
         return jsonify({"status": "fail", "message": str(e)})
 
@@ -617,7 +619,6 @@ def webhook():
     except Exception as e:
         return jsonify({"status": "fail", "error": str(e),"token":fcm_token}) # type: ignore
 
-
 @app.route('/send-notification', methods=["POST"])
 def send_notification():
     data = request.get_json()
@@ -649,7 +650,6 @@ def send_notification():
         except Exception as e:
             failed.append({"data": user, "error": str(e)})
     return jsonify({"status": "success", "successful": successful, "failed": failed})
-
 
 @app.route('/delete-users', methods=["POST"])
 def delete_users():
