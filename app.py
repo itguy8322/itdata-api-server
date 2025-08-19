@@ -96,9 +96,9 @@ def purchase_airtime():
                     body=f"You have successfully purchase N{amount} airtime to {number}"
                     message = messaging.Message(
                         data={
-                            "userId": userId,
-                            "title": title,
-                            "content": body
+                            "userId": str(userId),
+                            "title": str(title),
+                            "content": str(body)
                         },
                         token=fcm_token
                     )
