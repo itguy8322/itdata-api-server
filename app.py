@@ -583,7 +583,7 @@ def webhook():
         flw_ref = data["data"]["flw_ref"]
         tx_ref = data["data"]["tx_ref"]
         email = data["data"]["customer"]["email"]
-        date_created = data["data"]["created_datetime"]
+        # date_created = data["data"]["created_datetime"]
         userId = None
         if tx_ref in dynamic_vaccount_ref:
             userId = dynamic_vaccount_ref[tx_ref]
@@ -613,7 +613,7 @@ def webhook():
                 "amount_credited": str(amount),
                 "charges": str(float(charges["amount"])), # type: ignore
                 "balance_after": str(total),
-                "created_at": date_created,
+                "created_at": firestore.firestore.SERVER_TIMESTAMP,
                 "tx_ref": tx_ref,
                 "timestamp": firestore.firestore.SERVER_TIMESTAMP
             }
@@ -641,7 +641,7 @@ def webhook():
         response = messaging.send(message)
         return jsonify({"status": "success", "message_id": response,"token":fcm_token})
     except Exception as e:
-        return jsonify({"status": "fail", "error": str(e),"token":fcm_token}) # type: ignore
+        return jsonify({"status": "fail", "error": str(e)}) # type: ignore
 
 @app.route('/send-notification', methods=["POST"])
 def send_notification():
