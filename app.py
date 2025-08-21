@@ -388,7 +388,6 @@ def purchase_edupin():
         payload = {
             "exam": exam_id,
             "quantity": quantity,
-            "request-id": f"Exam_{time.strftime("%d%m%Y%H%M%S")}"
         }
 
         userRef = db.collection('users').document(userId)
@@ -617,7 +616,7 @@ def webhook():
                 "tx_ref": tx_ref,
                 "timestamp": firestore.firestore.SERVER_TIMESTAMP
             }
-            db.collection('walletFundings').document(tx_ref).set(wallet_fundings)
+            db.collection('walletFundings').document().set(wallet_fundings)
             body = f"Your wallet has been successfully credited with the sum of ₦{amount}. Please note that a ₦{charges["amount"]} service fee was deducted as part of the transaction." # type: ignore
         else:
             body = f"The transfer of ₦{amount} was not successful, please try again later to avoid double transaction"
