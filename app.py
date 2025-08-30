@@ -9,7 +9,10 @@ from datetime import datetime
 
 
 # Load the service account key
-cred = credentials.Certificate("/etc/secrets/config.json")
+path_dev = "config/config.json"
+path_prod = "/etc/secrets/config.json"
+
+cred = credentials.Certificate(path_prod)
 firebase_admin.initialize_app(cred)
 
 # Now you can use Firestore, Auth, etc.
@@ -40,13 +43,14 @@ def purchase_airtime():
         amount = float(data["amount"])
         airtime_type = data["airtime_type"]
         print(provider, number, amount, airtime_type)
+        trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
         payload = {
             "network": provider["network_id"],
             "phone": number,
             "plan_type": airtime_type,
             "amount": amount,
             "bypass": False,
-            "request-id": f"Airtime_{time.strftime("%d%m%Y%H%M%S")}"
+            "request-id": trnx_id
         }
 
         userRef = db.collection('users').document(userId)
@@ -56,7 +60,6 @@ def purchase_airtime():
             return jsonify({"status": "fail", "message": "User not found"})
         print("pass1")
         w_bal = float(user_data['wallet_bal'])
-        trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
         print("pass2")
         
         transaction_data = {
@@ -130,13 +133,14 @@ def purchase_data():
         number = data["number"]
         plan = data["plan"]
         amount = float(plan["price"])
+        trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
 
         payload = {
             "network": int(plan["network"]),
             "phone": number,
             "data_plan": int(plan['plan_id']),
             "bypass": False,
-            "request-id": f"Data_{time.strftime("%d%m%Y%H%M%S")}"
+            "request-id": trnx_id
         }
 
         userRef = db.collection('users').document(userId)
@@ -146,7 +150,7 @@ def purchase_data():
             return jsonify({"status": "fail", "message": "User not found"})
         fcm_token = user_data["fcm_token"]
         w_bal = float(user_data["wallet_bal"])
-        trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
+        
 
         transaction_data = {
             'user_id': userId,
@@ -210,13 +214,14 @@ def purchase_cable():
         iuc_number = int(data["iuc_number"])
         number = data["number"]
         amount = float(plan["price"])
+        trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
 
         payload = {
             "cable": int(plan["cable_id"]),
             "cable_plan": int(plan['plan_id']),
             "iuc": iuc_number,
             "bypass": False,
-            "request-id": f"Cable_{time.strftime("%d%m%Y%H%M%S")}"
+            "request-id": trnx_id
         }
 
         userRef = db.collection('users').document(userId)
@@ -226,7 +231,6 @@ def purchase_cable():
             return jsonify({"status": "fail", "message": "User not found"})
 
         w_bal = float(user_data["wallet_bal"])
-        trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
         transaction_data = {
             'user_id': userId,
             "type": "cable",
@@ -295,6 +299,7 @@ def purchase_electricity():
         meter_number = int(data["meter_number"])
         number = data["number"]
         meter_type = str(data["meter_type"])
+        trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
 
         payload = {
             "disco": int(disco),
@@ -302,7 +307,7 @@ def purchase_electricity():
             "meter_number": meter_number,
             "meter_type": meter_type,
             "bypass": False,
-            "request-id": f"Bill_{time.strftime("%d%m%Y%H%M%S")}"
+            "request-id": trnx_id
         }
 
         userRef = db.collection('users').document(userId)
@@ -311,7 +316,6 @@ def purchase_electricity():
             return jsonify({"status": "fail", "message": "User not found"})
 
         w_bal = float(user_data["wallet_bal"])
-        trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
         transaction_data = {
             'user_id': userId,
             "type": "electricity",
@@ -384,6 +388,7 @@ def purchase_edupin():
         quantity = float(data["quantity"])
         amount = float(data["amount"])
         number = data["number"]
+        trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
 
         payload = {
             "exam": exam_id,
@@ -396,7 +401,6 @@ def purchase_edupin():
             return jsonify({"status": "fail", "message": "User not found"})
 
         w_bal = float(user_data["wallet_bal"])
-        trnx_id = "trnx_" + str(int(datetime.utcnow().timestamp()))
         transaction_data = {
             'user_id': userId,
             "type": "Education",
@@ -457,6 +461,21 @@ def purchase_edupin():
             return jsonify({"status": "Insufficient balance", "message": "Insufficient balance"})
     except Exception as e:
         return jsonify({"status": "fail", "message": str(e)})
+
+# @app.route('/transaction-webhook', methods=["POST"]) # type: ignore
+# def retry_failed_transaction():
+#     data = request.get_json()
+#     trnxId = data["request-id"]
+#     transaction = db.collection('transactions').document(trnxId).get().to_dict()
+#     if not transaction:
+#         return jsonify({"status": "fail", "message": "Transaction not found"})
+#     if transaction["status"] == "pending":
+#         if data["status"] == "success":
+#             db.collection('transactions').document(trnxId).update({"status": "success"})
+#             print({"status": "success", "message": "Transaction updated to success"})
+#     return jsonify({"status": "success", "message": "Transaction updated to success"})
+        
+        
 
 @app.route('/verify-meter-number', methods=["POST"])
 def verify_meter_number():
@@ -532,12 +551,21 @@ def create_virtual_account():
         if data["amount"] != "":
             amount = float(data["amount"])
         tx_ref = f"tx_ref_{userId}_{int(datetime.utcnow().timestamp())}"
+        fullname = user_data['name'].split(" ") # type: ignore
+        firstName = ""
+        lastName = ""
+        if len(fullname) > 1:
+            firstName = fullname[0]
+            lastName = fullname[1]
+        else:
+            firstName = fullname[0]
+            lastName = fullname[0]
         payload = {
             "email":user_data['email'], # type: ignore
             "tx_ref": tx_ref,
             "phonenumber":user_data["phone"], # type: ignore
-            "firstname":user_data['name'].split(" ")[0], # type: ignore
-            "lastname":user_data['name'].split(" ")[1], # type: ignore
+            "firstname":firstName, # type: ignore
+            "lastname":lastName, # type: ignore
             
         }
         account_name = f"{userId} FLW"
@@ -571,6 +599,7 @@ def create_virtual_account():
             return jsonify({"status": "pending", "message": resp_json, "code":status_code})
         
     except Exception as e:
+        print(f"Error: {str(e)}")
         return jsonify({"status": "fail", "message": str(e), "code":"None"})
 
 @app.route('/funding-webhook', methods=["POST"])
